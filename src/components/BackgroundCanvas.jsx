@@ -110,7 +110,7 @@ export function BackgroundCanvas() {
         height: "100%",
         zIndex: 0,
         pointerEvents: "none",
-        opacity: 0.7,
+        opacity: 0.9,
       }}
     />
   );
