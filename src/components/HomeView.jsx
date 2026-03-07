@@ -1,19 +1,15 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { SAMPLES } from "../data/samples";
 import { scoreColor } from "../config/driftRules";
+import { useReveal } from "../utils/animate";
 
 // ─── EmailJS config ───────────────────────────────────────────────────────────
-// Fill these in from your EmailJS dashboard (emailjs.com)
-// Account → General → Public Key
-// Email Services → your service ID
-// Email Templates → your template ID
 
 const EMAILJS_SERVICE_ID  = import.meta.env.VITE_EMAILJS_SERVICE_ID;
 const EMAILJS_TEMPLATE_ID = import.meta.env.VITE_EMAILJS_TEMPLATE_ID;
 const EMAILJS_PUBLIC_KEY  = import.meta.env.VITE_EMAILJS_PUBLIC_KEY;
 
 async function sendAccessRequest({ name, company, email, role }) {
-  // Load EmailJS SDK lazily from CDN if not already loaded
   if (!window.emailjs) {
     await new Promise((resolve, reject) => {
       const script = document.createElement("script");
@@ -24,7 +20,6 @@ async function sendAccessRequest({ name, company, email, role }) {
     });
     window.emailjs.init({ publicKey: EMAILJS_PUBLIC_KEY });
   }
-
   return window.emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, {
     from_name:    name,
     from_email:   email,
@@ -37,29 +32,22 @@ async function sendAccessRequest({ name, company, email, role }) {
 // ─── Feature list ─────────────────────────────────────────────────────────────
 
 const ACCESS_FEATURES = [
-  {
-    icon: "⚙",
-    title: "Secure document ingestion",
-    body: "Annual reports, sustainability disclosures, CDP responses, and investor presentations — processed against your internal commitment taxonomy via our onboarding pipeline.",
-  },
-  {
-    icon: "⚖",
-    title: "CSRD & SEC audit-ready output",
-    body: "Every extracted commitment is source-cited and exportable. Designed to feed directly into regulatory disclosure workflows and legal review.",
-  },
-  {
-    icon: "🔒",
-    title: "Enterprise data isolation",
-    body: "Your documents never leave your environment. AuditAI deploys within your cloud tenancy — no shared infrastructure, no third-party data exposure.",
-  },
+  { icon: "⚙", title: "Secure document ingestion",     body: "Annual reports, sustainability disclosures, CDP responses, and investor presentations — processed against your internal commitment taxonomy via our onboarding pipeline." },
+  { icon: "⚖", title: "CSRD & SEC audit-ready output", body: "Every extracted commitment is source-cited and exportable. Designed to feed directly into regulatory disclosure workflows and legal review." },
+  { icon: "🔒", title: "Enterprise data isolation",     body: "Your documents never leave your environment. AuditAI deploys within your cloud tenancy — no shared infrastructure, no third-party data exposure." },
 ];
 
 // ─── Component ────────────────────────────────────────────────────────────────
 
 export function HomeView({ onLoadSample }) {
-  const [form,      setForm]      = useState({ name: "", company: "", email: "", role: "" });
-  const [status,    setStatus]    = useState("idle"); // idle | sending | success | error
-  const [errorMsg,  setErrorMsg]  = useState("");
+  const [form,     setForm]     = useState({ name: "", company: "", email: "", role: "" });
+  const [status,   setStatus]   = useState("idle");
+  const [errorMsg, setErrorMsg] = useState("");
+
+  // Scroll-triggered reveal refs
+  const [heroRef,    heroVisible]    = useReveal(0.1);
+  const [cardsRef,   cardsVisible]   = useReveal(0.1);
+  const [accessRef,  accessVisible]  = useReveal(0.1);
 
   function handleChange(e) {
     setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));
@@ -69,7 +57,6 @@ export function HomeView({ onLoadSample }) {
     if (!form.name.trim() || !form.email.trim() || !form.company.trim()) return;
     setStatus("sending");
     setErrorMsg("");
-
     try {
       await sendAccessRequest(form);
       setStatus("success");
@@ -86,71 +73,86 @@ export function HomeView({ onLoadSample }) {
     <div className="home">
 
       {/* ── Hero ─────────────────────────────────────────────────────────────── */}
-      <div className="home-eyebrow">ESG Commitment Intelligence</div>
-
-      <h1 className="home-h">
-        Commitments made.<br />
-        <i>Commitments kept?</i>
-      </h1>
-
-      <p className="home-p">
-        Energy companies have made hundreds of public climate commitments over the past
-        decade — across annual reports, investor days, and regulatory filings. AuditAI
-        extracts every commitment, tracks what changed year-over-year, scores credibility
-        exposure, and answers your hardest investor and regulatory questions from the
-        actual source documents.
-      </p>
+      <div ref={heroRef} className={`anim-block ${heroVisible ? "anim-in" : ""}`}>
+        <div className="home-eyebrow">ESG Commitment Intelligence</div>
+        <h1 className="home-h">
+          Commitments made.<br />
+          <i>Commitments kept?</i>
+        </h1>
+        <p className="home-p">
+          Energy companies have made hundreds of public climate commitments over the past
+          decade — across annual reports, investor days, and regulatory filings. AuditAI
+          extracts every commitment, tracks what changed year-over-year, scores credibility
+          exposure, and answers your hardest investor and regulatory questions from the
+          actual source documents.
+        </p>
+      </div>
 
       {/* ── Sample cards ─────────────────────────────────────────────────────── */}
-      <div className="section-lbl">Live examples — click any company to explore</div>
+      <div ref={cardsRef}>
+        <div className={`section-lbl anim-block ${cardsVisible ? "anim-in" : ""}`}
+          style={{ "--delay": "0ms" }}>
+          Live examples — click any company to explore
+        </div>
 
-      <div className="samples-grid">
-        {Object.values(SAMPLES).map((sample) => {
-          const scoreCol      = scoreColor(sample.credibility_score);
-          const negativeDrift = sample.drift.commitment_threads.filter(
-            (t) => t.drift === "dropped" || t.drift === "revised_down"
-          ).length;
-          const totalThreads  = sample.drift.commitment_threads.length;
+        <div className="samples-grid">
+          {Object.values(SAMPLES).map((sample, i) => {
+            const scoreCol      = scoreColor(sample.credibility_score);
+            const negativeDrift = sample.drift.commitment_threads.filter(
+              (t) => t.drift === "dropped" || t.drift === "revised_down"
+            ).length;
+            const totalThreads  = sample.drift.commitment_threads.length;
 
-          return (
-            <div className="sample-card" key={sample.company} onClick={() => onLoadSample(sample)}>
-              <div className="sc-company">{sample.company}</div>
-              <div className="sc-years">{sample.years}</div>
-              <div className="sc-tag">{sample.tagline}</div>
+            return (
+              <div
+                className={`sample-card anim-block ${cardsVisible ? "anim-in" : ""}`}
+                style={{ "--delay": `${i * 100}ms` }}
+                key={sample.company}
+                onClick={() => onLoadSample(sample)}
+              >
+                <div className="sc-company">{sample.company}</div>
+                <div className="sc-years">{sample.years}</div>
+                <div className="sc-tag">{sample.tagline}</div>
 
-              <div className="sc-score-row">
-                <div>
-                  <div className="sc-score" style={{ color: scoreCol }}>{sample.credibility_score}</div>
-                  <div className="sc-score-lbl">Credibility / 100</div>
-                </div>
-                <div className="sc-threads">
-                  <div style={{ fontSize: "1.1rem", fontFamily: "var(--serif)", color: "#ef4444" }}>
-                    {negativeDrift}
-                    <span style={{ fontSize: ".7rem", color: "var(--tx3)" }}> / {totalThreads}</span>
+                <div className="sc-score-row">
+                  <div>
+                    <div className="sc-score" style={{ color: scoreCol }}>{sample.credibility_score}</div>
+                    <div className="sc-score-lbl">Credibility / 100</div>
                   </div>
-                  <div>commitments deteriorated</div>
+                  <div className="sc-threads">
+                    <div style={{ fontSize: "1.1rem", fontFamily: "var(--serif)", color: "#ef4444" }}>
+                      {negativeDrift}
+                      <span style={{ fontSize: ".7rem", color: "var(--tx3)" }}> / {totalThreads}</span>
+                    </div>
+                    <div>commitments deteriorated</div>
+                  </div>
                 </div>
-              </div>
 
-              <button className="sc-load-btn">Explore analysis →</button>
-            </div>
-          );
-        })}
+                <button className="sc-load-btn">Explore analysis →</button>
+              </div>
+            );
+          })}
+        </div>
       </div>
 
       {/* ── Request Access ───────────────────────────────────────────────────── */}
       <div className="divider">for your company</div>
 
-      <div className="access-section">
-
+      <div
+        ref={accessRef}
+        className={`access-section anim-block ${accessVisible ? "anim-in" : ""}`}
+      >
         {/* Left: feature list */}
         <div className="access-features">
           <div className="section-lbl" style={{ marginBottom: "1.5rem" }}>
             What's included in full access
           </div>
-
-          {ACCESS_FEATURES.map((f) => (
-            <div className="access-feature" key={f.title}>
+          {ACCESS_FEATURES.map((f, i) => (
+            <div
+              className={`access-feature anim-block ${accessVisible ? "anim-in" : ""}`}
+              style={{ "--delay": `${i * 80}ms` }}
+              key={f.title}
+            >
               <div className="af-icon">{f.icon}</div>
               <div>
                 <div className="af-title">{f.title}</div>
@@ -158,7 +160,6 @@ export function HomeView({ onLoadSample }) {
               </div>
             </div>
           ))}
-
           <div className="access-note">
             Currently in private beta with ESG and Investor Relations teams at
             European energy majors. Enterprise pricing available on request.
@@ -185,50 +186,29 @@ export function HomeView({ onLoadSample }) {
               </div>
 
               <div className="form-fields">
-                <div className="form-row">
-                  <label className="form-lbl">Full name</label>
-                  <input
-                    className="form-inp"
-                    name="name"
-                    placeholder="Jane Smith"
-                    value={form.name}
-                    onChange={handleChange}
-                  />
-                </div>
-
-                <div className="form-row">
-                  <label className="form-lbl">Company</label>
-                  <input
-                    className="form-inp"
-                    name="company"
-                    placeholder="Equinor, Chevron, ExxonMobil, etc."
-                    value={form.company}
-                    onChange={handleChange}
-                  />
-                </div>
-
-                <div className="form-row">
-                  <label className="form-lbl">Work email</label>
-                  <input
-                    className="form-inp"
-                    name="email"
-                    type="email"
-                    placeholder="jane@company.com"
-                    value={form.email}
-                    onChange={handleChange}
-                  />
-                </div>
+                {[
+                  { name: "name",    label: "Full name",   type: "text",  placeholder: "Jane Smith"            },
+                  { name: "company", label: "Company",     type: "text",  placeholder: "Equinor, Chevron…"     },
+                  { name: "email",   label: "Work email",  type: "email", placeholder: "jane@company.com"      },
+                ].map((field) => (
+                  <div className="form-row" key={field.name}>
+                    <label className="form-lbl">{field.label}</label>
+                    <input
+                      className="form-inp"
+                      name={field.name}
+                      type={field.type}
+                      placeholder={field.placeholder}
+                      value={form[field.name]}
+                      onChange={handleChange}
+                    />
+                  </div>
+                ))}
 
                 <div className="form-row">
                   <label className="form-lbl">
                     Role <span style={{ color: "var(--tx3)" }}>(optional)</span>
                   </label>
-                  <select
-                    className="form-inp form-sel"
-                    name="role"
-                    value={form.role}
-                    onChange={handleChange}
-                  >
+                  <select className="form-inp form-sel" name="role" value={form.role} onChange={handleChange}>
                     <option value="">Select your function…</option>
                     <option value="ESG / Sustainability">ESG / Sustainability</option>
                     <option value="Investor Relations">Investor Relations</option>
@@ -240,9 +220,7 @@ export function HomeView({ onLoadSample }) {
                 </div>
               </div>
 
-              {status === "error" && (
-                <div className="form-error">{errorMsg}</div>
-              )}
+              {status === "error" && <div className="form-error">{errorMsg}</div>}
 
               <button
                 className="btn-request"

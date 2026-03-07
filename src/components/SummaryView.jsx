@@ -1,41 +1,18 @@
 import { useState } from "react";
 import { createPortal } from "react-dom";
 import { scoreColor, NEGATIVE_DRIFT } from "../config/driftRules";
+import { useReveal, useCountUp } from "../utils/animate";
 
 // ─── Methodology data ─────────────────────────────────────────────────────────
 
 const DIMENSIONS = [
-  {
-    key: "consistency",
-    label: "Consistency",
-    weight: "35%",
-    description:
-      "Measures whether commitments made in earlier reports are still present — and unchanged — in later reports. A company that quietly drops or rewrites targets between annual reports scores low here. Maintained and on_track threads score positively; dropped and revised_down threads penalise heavily.",
-  },
-  {
-    key: "specificity",
-    label: "Specificity",
-    weight: "25%",
-    description:
-      "Measures how quantified and time-bound the commitments are. Vague language ('we aim to reduce emissions over time') scores low. Concrete, numeric, year-bound commitments ('reduce absolute Scope 3 by 30% by 2035 vs 2016') score high. Replacing a numeric target with aspirational language is penalised in the year the change occurs.",
-  },
-  {
-    key: "ambition",
-    label: "Ambition",
-    weight: "25%",
-    description:
-      "Measures whether the targets are genuinely challenging relative to science and peer benchmarks. Covers the level of emission reduction pledged, clean energy investment as a share of total capex, and whether the company sets absolute targets (harder) or intensity targets (easier). Weakening from absolute to intensity-based metrics is penalised.",
-  },
-  {
-    key: "disclosure",
-    label: "Disclosure",
-    weight: "15%",
-    description:
-      "Measures the quality and transparency of reporting — interim milestones, methodology explanations, explicit conditionality. High disclosure scores do not mean good performance; they mean honesty. A company can score high on disclosure while scoring low on consistency.",
-  },
+  { key: "consistency", label: "Consistency", weight: "35%", description: "Measures whether commitments made in earlier reports are still present — and unchanged — in later reports. A company that quietly drops or rewrites targets between annual reports scores low here. Maintained and on_track threads score positively; dropped and revised_down threads penalise heavily." },
+  { key: "specificity",  label: "Specificity",  weight: "25%", description: "Measures how quantified and time-bound the commitments are. Vague language ('we aim to reduce emissions over time') scores low. Concrete, numeric, year-bound commitments ('reduce absolute Scope 3 by 30% by 2035 vs 2016') score high. Replacing a numeric target with aspirational language is penalised in the year the change occurs." },
+  { key: "ambition",     label: "Ambition",     weight: "25%", description: "Measures whether the targets are genuinely challenging relative to science and peer benchmarks. Covers the level of emission reduction pledged, clean energy investment as a share of total capex, and whether the company sets absolute targets (harder) or intensity targets (easier). Weakening from absolute to intensity-based metrics is penalised." },
+  { key: "disclosure",   label: "Disclosure",   weight: "15%", description: "Measures the quality and transparency of reporting — interim milestones, methodology explanations, explicit conditionality. High disclosure scores do not mean good performance; they mean honesty. A company can score high on disclosure while scoring low on consistency." },
 ];
 
-// ─── Modal ────────────────────────────────────────────────────────────────────
+// ─── Methodology Modal ────────────────────────────────────────────────────────
 
 function MethodologyModal({ score, breakdown, onClose }) {
   return createPortal(
@@ -50,7 +27,6 @@ function MethodologyModal({ score, breakdown, onClose }) {
           <button className="modal-close" onClick={onClose}>✕</button>
         </div>
 
-        {/* Formula */}
         <div className="modal-formula">
           {DIMENSIONS.map((d) => (
             <div className="mf-row" key={d.key}>
@@ -72,7 +48,6 @@ function MethodologyModal({ score, breakdown, onClose }) {
           </div>
         </div>
 
-        {/* Dimension definitions */}
         <div className="modal-dims">
           {DIMENSIONS.map((d) => (
             <div className="modal-dim" key={d.key}>
@@ -90,44 +65,64 @@ function MethodologyModal({ score, breakdown, onClose }) {
           ))}
         </div>
 
-        {/* Score bands */}
         <div className="modal-bands">
           <div className="mb-title">Score bands</div>
-          <div className="mb-row">
-            <span className="mb-range" style={{ color: "#22c55e" }}>65 – 100</span>
-            <span className="mb-desc">Lower exposure. Commitments are broadly consistent and specific.</span>
-          </div>
-          <div className="mb-row">
-            <span className="mb-range" style={{ color: "#f59e0b" }}>42 – 64</span>
-            <span className="mb-desc">Moderate exposure. Some drift or weakening detected.</span>
-          </div>
-          <div className="mb-row">
-            <span className="mb-range" style={{ color: "#ef4444" }}>0 – 41</span>
-            <span className="mb-desc">High exposure. Material commitments dropped, revised down, or made conditional.</span>
-          </div>
+          {[
+            { range: "65 – 100", color: "#22c55e", desc: "Lower exposure. Commitments are broadly consistent and specific." },
+            { range: "42 – 64",  color: "#f59e0b", desc: "Moderate exposure. Some drift or weakening detected." },
+            { range: "0 – 41",   color: "#ef4444", desc: "High exposure. Material commitments dropped, revised down, or made conditional." },
+          ].map((b) => (
+            <div className="mb-row" key={b.range}>
+              <span className="mb-range" style={{ color: b.color }}>{b.range}</span>
+              <span className="mb-desc">{b.desc}</span>
+            </div>
+          ))}
         </div>
 
         <div className="modal-note">
           Consistency carries the highest weight because commitment drift — not just ambition — is the primary driver of regulatory and legal exposure under CSRD and SEC climate disclosure rules.
         </div>
-
       </div>
     </div>,
     document.body
   );
 }
 
+// ─── Animated score bar ───────────────────────────────────────────────────────
+
+function ScoreBar({ label, value, visible }) {
+  const color = scoreColor(value ?? 0);
+  return (
+    <div className="br">
+      <div className="br-lbl">
+        <span>{label}</span>
+        <span style={{ color }}>{value ?? "—"}/100</span>
+      </div>
+      <div className="bt">
+        <div
+          className="bf"
+          style={{
+            width: visible ? `${value ?? 0}%` : "0%",
+            background: color,
+            transition: visible ? "width 1s cubic-bezier(.22,.68,0,1.2)" : "none",
+          }}
+        />
+      </div>
+    </div>
+  );
+}
+
 // ─── Main view ────────────────────────────────────────────────────────────────
 
 export function SummaryView({ drift }) {
-  const [modalOpen, setModalOpen] = useState(false);
+  const [modalOpen, setModalOpen]     = useState(false);
+  const [scoreRef,  scoreVisible]     = useReveal(0.2);
+  const [breakRef,  breakVisible]     = useReveal(0.15);
+  const [risksRef,  risksVisible]     = useReveal(0.1);
+  const animatedScore                 = useCountUp(drift?.credibility_score ?? 0, 1400, scoreVisible);
 
   if (!drift) {
-    return (
-      <div className="empty">
-        Select a company above to generate drift analysis &amp; credibility score.
-      </div>
-    );
+    return <div className="empty">Select a company above to generate drift analysis &amp; credibility score.</div>;
   }
 
   const scoreCol           = scoreColor(drift.credibility_score);
@@ -137,11 +132,14 @@ export function SummaryView({ drift }) {
 
   return (
     <div>
-      {/* ── Score + Breakdown ───────────────────────────────────────────────── */}
       <div className="sum-grid">
 
-        <div className="score-box">
-          <div className="score-n" style={{ color: scoreCol }}>{drift.credibility_score}</div>
+        {/* Animated credibility score */}
+        <div
+          ref={scoreRef}
+          className={`score-box anim-block ${scoreVisible ? "anim-in" : ""}`}
+        >
+          <div className="score-n" style={{ color: scoreCol }}>{animatedScore}</div>
           <div className="score-tag">Credibility Score / 100</div>
           <div className="score-rat">{drift.credibility_rationale}</div>
           <button className="score-method-btn" onClick={() => setModalOpen(true)}>
@@ -149,29 +147,26 @@ export function SummaryView({ drift }) {
           </button>
         </div>
 
-        <div className="breakdown">
+        {/* Score breakdown bars — fill in on scroll */}
+        <div
+          ref={breakRef}
+          className={`breakdown anim-block ${breakVisible ? "anim-in" : ""}`}
+        >
           <div className="bd-title">Score Breakdown</div>
-          {DIMENSIONS.map((d) => {
-            const val   = drift.score_breakdown?.[d.key];
-            const color = scoreColor(val ?? 0);
-            return (
-              <div className="br" key={d.key}>
-                <div className="br-lbl">
-                  <span>{d.label}</span>
-                  <span style={{ color }}>{val ?? "—"}/100</span>
-                </div>
-                <div className="bt">
-                  <div className="bf" style={{ width: `${val ?? 0}%`, background: color }} />
-                </div>
-              </div>
-            );
-          })}
+          {DIMENSIONS.map((d) => (
+            <ScoreBar
+              key={d.key}
+              label={d.label}
+              value={drift.score_breakdown?.[d.key]}
+              visible={breakVisible}
+            />
+          ))}
         </div>
       </div>
 
-      {/* ── Risks + Strengths ───────────────────────────────────────────────── */}
-      <div className="rk-grid">
-        <div className="rk">
+      {/* Risks + Strengths */}
+      <div ref={risksRef} className="rk-grid">
+        <div className={`rk anim-block ${risksVisible ? "anim-in" : ""}`} style={{ "--delay": "0ms" }}>
           <div className="rk-h" style={{ color: "var(--red)" }}>⚠ Key Risks</div>
           {(drift.key_risks || []).map((risk, i) => (
             <div className="rk-item" key={i}>
@@ -180,7 +175,7 @@ export function SummaryView({ drift }) {
             </div>
           ))}
         </div>
-        <div className="rk">
+        <div className={`rk anim-block ${risksVisible ? "anim-in" : ""}`} style={{ "--delay": "100ms" }}>
           <div className="rk-h" style={{ color: "var(--green)" }}>✓ Strengths</div>
           {(drift.key_strengths || []).map((strength, i) => (
             <div className="rk-item" key={i}>
@@ -191,7 +186,6 @@ export function SummaryView({ drift }) {
         </div>
       </div>
 
-      {/* ── Footer ──────────────────────────────────────────────────────────── */}
       <div style={{ fontFamily: "var(--mono)", fontSize: ".6rem", color: "var(--tx3)", textAlign: "center" }}>
         {drift.commitment_threads?.length || 0} commitment threads · {negativeDriftCount} negative drift flags
       </div>

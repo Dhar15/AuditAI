@@ -28,6 +28,9 @@
 
 html, body { background: var(--bg); color: var(--tx); font-family: var(--sans); }
 
+/* Sits above the fixed canvas — all UI content goes here */
+.app-layer { position: relative; z-index: 1; min-height: 100vh; }
+
 ::-webkit-scrollbar       { width: 5px; height: 5px; }
 ::-webkit-scrollbar-track { background: var(--bg2); }
 ::-webkit-scrollbar-thumb { background: var(--bg4); border-radius: 3px; }
@@ -38,10 +41,11 @@ input[type=file] { display: none; }
 
 .nav {
   position: sticky; top: 0; z-index: 80;
-  background: rgba(7,8,16,0.93); backdrop-filter: blur(18px);
+  background: rgba(7,8,16,0.88); backdrop-filter: blur(20px);
   border-bottom: 1px solid var(--b1);
   display: flex; align-items: center; justify-content: space-between;
   padding: 0 1.75rem; height: 56px;
+  animation: navSlide .4s cubic-bezier(.22,.68,0,1.1) both;
 }
 .logo { font-family: var(--serif); font-size: 1.1rem; color: var(--tx); cursor: pointer; display: flex; align-items: center; gap: .3rem; }
 .logo i { font-style: italic; color: var(--gold); }
@@ -50,9 +54,9 @@ input[type=file] { display: none; }
 .tab {
   font-family: var(--mono); font-size: .65rem; letter-spacing: .07em; text-transform: uppercase;
   padding: .35rem .8rem; border-radius: 3px; cursor: pointer;
-  color: var(--tx3); background: transparent; border: none; transition: all .12s;
+  color: var(--tx3); background: transparent; border: none; transition: all .18s;
 }
-.tab:hover:not(:disabled) { color: var(--tx2); background: var(--bg3); }
+.tab:hover:not(:disabled) { color: var(--tx2); background: var(--bg3); transform: translateY(-1px); }
 .tab.on { color: var(--gold); background: var(--gd); }
 .tab:disabled { opacity: .22; cursor: default; }
 
@@ -79,15 +83,16 @@ input[type=file] { display: none; }
 /* Sample cards */
 .samples-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 1rem; margin-bottom: 3rem; }
 .sample-card {
-  background: var(--bg2); border: 1px solid var(--b1); border-radius: 7px;
-  padding: 1.5rem; cursor: pointer; transition: all .18s; position: relative; overflow: hidden;
+  background: rgba(12,14,25,0.75); backdrop-filter: blur(12px);
+  border: 1px solid var(--b1); border-radius: 7px;
+  padding: 1.5rem; cursor: pointer; transition: all .22s; position: relative; overflow: hidden;
 }
 .sample-card::before {
   content: ''; position: absolute; inset: 0;
   background: radial-gradient(circle at top left, rgba(201,153,58,.06), transparent 60%);
   opacity: 0; transition: opacity .2s;
 }
-.sample-card:hover { border-color: var(--b2); transform: translateY(-2px); box-shadow: 0 12px 32px rgba(0,0,0,.35); }
+.sample-card:hover { border-color: var(--b2); transform: translateY(-5px) scale(1.01); box-shadow: 0 20px 48px rgba(0,0,0,.45); }
 .sample-card:hover::before { opacity: 1; }
 
 .sc-company { font-family: var(--mono); font-size: .68rem; letter-spacing: .1em; text-transform: uppercase; color: var(--gold); margin-bottom: .4rem; }
@@ -115,7 +120,8 @@ input[type=file] { display: none; }
 
 .access-section {
   display: grid; grid-template-columns: 1fr 1fr; gap: 2.5rem;
-  background: var(--bg2); border: 1px solid var(--b1); border-radius: 8px;
+  background: rgba(12,14,25,0.75); backdrop-filter: blur(14px);
+  border: 1px solid var(--b1); border-radius: 8px;
   padding: 2.5rem;
 }
 
@@ -157,6 +163,12 @@ input[type=file] { display: none; }
 .btn-request:hover    { background: var(--gold2); }
 .btn-request:disabled { opacity: .3; cursor: not-allowed; }
 
+.form-error {
+  font-family: var(--mono); font-size: .65rem; color: var(--red);
+  background: rgba(239,68,68,.08); border: 1px solid rgba(239,68,68,.2);
+  border-radius: 4px; padding: .55rem .8rem; margin-bottom: .75rem;
+}
+
 .access-success { display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; height: 100%; padding: 2rem 1rem; }
 .as-icon { font-size: 2rem; color: var(--green); margin-bottom: 1rem; }
 .as-h    { font-family: var(--serif); font-size: 1.3rem; margin-bottom: .6rem; }
@@ -184,12 +196,12 @@ input[type=file] { display: none; }
 /* ─── Summary ───────────────────────────────────────────────────────────────── */
 
 .sum-grid  { display: grid; grid-template-columns: 240px 1fr; gap: 1rem; margin-bottom: 1rem; }
-.score-box { background: var(--bg2); border: 1px solid var(--b1); border-radius: 6px; padding: 1.75rem 1.5rem; display: flex; flex-direction: column; align-items: center; text-align: center; }
+.score-box { background: rgba(12,14,25,0.78); backdrop-filter: blur(12px); border: 1px solid var(--b1); border-radius: 6px; padding: 1.75rem 1.5rem; display: flex; flex-direction: column; align-items: center; text-align: center; }
 .score-n   { font-family: var(--serif); font-size: 4.2rem; line-height: 1; }
 .score-tag { font-family: var(--mono); font-size: .58rem; letter-spacing: .1em; text-transform: uppercase; color: var(--tx3); margin-top: .35rem; }
 .score-rat { font-size: .77rem; color: var(--tx2); line-height: 1.6; margin-top: .9rem; text-align: left; }
 
-.breakdown { background: var(--bg2); border: 1px solid var(--b1); border-radius: 6px; padding: 1.4rem; }
+.breakdown { background: rgba(12,14,25,0.78); backdrop-filter: blur(12px); border: 1px solid var(--b1); border-radius: 6px; padding: 1.4rem; }
 .bd-title    { font-family: var(--mono); font-size: .58rem; letter-spacing: .1em; text-transform: uppercase; color: var(--tx3); margin-bottom: 1.1rem; }
 .br          { margin-bottom: .75rem; }
 .br-lbl      { display: flex; justify-content: space-between; font-family: var(--mono); font-size: .63rem; color: var(--tx2); margin-bottom: .28rem; }
@@ -352,5 +364,32 @@ input[type=file] { display: none; }
 }
 .empty { text-align: center; padding: 3.5rem 2rem; color: var(--tx3); font-family: var(--mono); font-size: .72rem; }
 
-@keyframes sp { to { transform: rotate(360deg); } }
-@keyframes fi { from { opacity: 0; transform: translateY(3px); } to { opacity: 1; transform: translateY(0); } }
+/* ─── Keyframes ──────────────────────────────────────────────────────────────── */
+
+@keyframes sp       { to { transform: rotate(360deg); } }
+@keyframes fi       { from { opacity: 0; transform: translateY(4px);  } to { opacity: 1; transform: translateY(0);  } }
+@keyframes slideUp  { from { opacity: 0; transform: translateY(28px); } to { opacity: 1; transform: translateY(0);  } }
+@keyframes fadeIn   { from { opacity: 0; }                              to { opacity: 1; }                             }
+@keyframes scaleIn  { from { opacity: 0; transform: scale(.97);       } to { opacity: 1; transform: scale(1);        } }
+@keyframes navSlide { from { transform: translateY(-100%); opacity: 0;} to { transform: translateY(0);   opacity: 1; } }
+
+/* ─── Page & tab transitions ────────────────────────────────────────────────── */
+
+.page-enter { animation: fadeIn .3s ease both; }
+.tab-enter  { animation: slideUp .25s ease both; }
+
+/* ─── Scroll-reveal system ──────────────────────────────────────────────────── */
+/* Elements start invisible; JS adds .anim-in once they enter the viewport.     */
+/* --delay CSS variable enables per-element stagger.                             */
+
+.anim-block {
+  opacity: 0;
+  transform: translateY(22px);
+  transition:
+    opacity   .55s cubic-bezier(.22,.68,0,1.05) var(--delay, 0ms),
+    transform .55s cubic-bezier(.22,.68,0,1.05) var(--delay, 0ms);
+}
+.anim-block.anim-in {
+  opacity: 1;
+  transform: translateY(0);
+}
