@@ -53,9 +53,39 @@ export function buildDriftPrompt(docs) {
 Your task:
 1. Group commitments referring to the SAME underlying goal into "commitment threads" — match by topic similarity, not exact wording.
 2. For each thread, determine drift from earliest to latest year.
-3. Produce an overall credibility score 0–100 and honest rationale.
+3. Score each dimension using the EXACT rubric below. Do not deviate.
 
 Drift values: maintained | softened | revised_down | revised_up | dropped | new | on_track
+
+SCORING RUBRIC:
+
+CONSISTENCY (0-100): Pct of threads NOT dropped or revised_down.
+  Formula: (maintained+on_track+revised_up+new threads) / total_threads * 100
+  Then subtract 10 for each thread where language became conditional. Floor 0.
+
+SPECIFICITY (0-100): Score each commitment in the LATEST year: 2=has numeric target AND year, 1=has one of the two, 0=vague only.
+  Average score * 50 = specificity. E.g. 4 commitments scoring 2,2,1,0 = avg 1.25 * 50 = 63.
+
+AMBITION (0-100): Base 50.
+  +20 if absolute emission reduction >= 40% by 2030/2035 in latest year
+  +10 if net zero / carbon neutral target in latest year
+  +10 if clean capex >= 25% of total in latest year
+  -15 if absolute Scope 3 replaced by intensity metric at any point
+  -10 if any target year pushed back vs earliest year
+  -10 if production reduction target removed or reversed
+  Floor 0, cap 100.
+
+DISCLOSURE (0-100): Base 40.
+  +15 if progress reported with actual figures (not just restated targets)
+  +15 if conditional assumptions explicitly disclosed
+  +15 if methodology changes between years are explained
+  +10 if interim milestones set for long-term targets
+  -10 per year a commitment was silently removed with no explanation (max -20)
+  Floor 0, cap 100.
+
+CREDIBILITY: Round(consistency*0.35 + specificity*0.25 + ambition*0.25 + disclosure*0.15)
+
+Include score_notes: one sentence per dimension explaining what specifically drove the score for this company.
 
 Return ONLY valid JSON, no fences, no commentary:
 {
@@ -63,6 +93,7 @@ Return ONLY valid JSON, no fences, no commentary:
   "credibility_score": integer,
   "credibility_rationale": "2-3 sentence honest assessment of consistency pattern",
   "score_breakdown": { "consistency": int, "specificity": int, "ambition": int, "disclosure": int },
+  "score_notes": { "consistency": "one sentence", "specificity": "one sentence", "ambition": "one sentence", "disclosure": "one sentence" },
   "commitment_threads": [
     {
       "topic": "string",

@@ -48,6 +48,12 @@ const BP_DRIFT = {
   credibility_score: 34,
   credibility_rationale: "BP has materially walked back every major climate commitment made in 2022 across successive annual reports. The 40% production cut became 25%, then disappeared entirely. Low-carbon investment fell from $5B to under $2B/year. Net zero language is now explicitly conditional. This pattern of systematic retreat represents the most significant negative commitment drift among major European oil majors.",
   score_breakdown: { consistency: 20, specificity: 35, ambition: 28, disclosure: 55 },
+  score_notes: {
+    consistency: "4 of 5 threads dropped or revised_down across the 3 years, with the oil production target fully reversed — only 1 thread maintained.",
+    specificity: "2022 commitments were highly numeric; by 2024 most had been replaced with ranges or dropped entirely, pulling the average down.",
+    ambition: "Base 50, +10 net zero, −15 Scope 3 replaced by intensity, −10 production target reversed, −10 low-carbon capex cut by 70%.",
+    disclosure: "Base 40, +15 conditional assumptions disclosed in 2024, −10 production target silently dropped, −10 renewable target abandoned without replacement.",
+  },
   commitment_threads: [
     {
       topic: "Oil & Gas Production Cut", category: "production_change", drift: "dropped",
@@ -146,6 +152,12 @@ const SHELL_DRIFT = {
   credibility_score: 51,
   credibility_rationale: "Shell shows a more measured but still concerning drift pattern. The 2035 carbon intensity target and absolute Scope 3 goals were quietly withdrawn between 2022 and 2023 — coinciding with mounting legal pressure. Capital investment commitments have been reduced and reframed around LNG. Net zero language persists but with increasing conditionality.",
   score_breakdown: { consistency: 48, specificity: 50, ambition: 44, disclosure: 62 },
+  score_notes: {
+    consistency: "2 of 4 threads dropped or revised_down (Scope 3 absolute target removed, 2035 carbon intensity milestone dropped); 2 threads maintained.",
+    specificity: "2030 targets remain numeric but the 2035 milestone was removed, reducing the number of time-bound commitments by 25%.",
+    ambition: "Base 50, +10 net zero, −15 Scope 3 replaced by intensity, −10 2035 target year removed — no equivalent replacement set.",
+    disclosure: "Base 40, +15 conditional assumptions disclosed, +15 methodology changes explained when switching to intensity metric, −10 2035 target silently dropped.",
+  },
   commitment_threads: [
     {
       topic: "Carbon Intensity Targets", category: "emissions_target", drift: "revised_down",
@@ -236,6 +248,12 @@ const TOTAL_DRIFT = {
   credibility_score: 58,
   credibility_rationale: "TotalEnergies shows the most consistency of the three majors — core targets have not been materially revised or dropped. However, the company faces the most severe legal exposure: a French court found TotalEnergies liable in 2024 for misleading climate disclosures, and regulators have challenged the gap between the 2050 net zero language and near-term production expansion.",
   score_breakdown: { consistency: 72, specificity: 65, ambition: 55, disclosure: 40 },
+  score_notes: {
+    consistency: "4 of 4 tracked threads maintained or on_track across all 3 years — no targets dropped or revised down, the strongest consistency score of the three majors.",
+    specificity: "100GW renewable target and >40% Scope 1&2 reduction are both numeric and year-bound; LNG targets lack absolute reduction metrics.",
+    ambition: "Base 50, +20 absolute Scope 1&2 >= 40% by 2030, +10 net zero, +10 clean capex >= 25% — but no absolute Scope 3 target present.",
+    disclosure: "Base 40, +15 progress reported with actual figures (27GW installed), but methodology challenged in court and interim milestones not consistently set.",
+  },
   commitment_threads: [
     {
       topic: "Net Zero 2050", category: "emissions_target", drift: "maintained",
