@@ -99,7 +99,7 @@ input[type=file] { display: none; }
 .sc-years   { font-family: var(--mono); font-size: .6rem; color: var(--tx3); margin-bottom: .9rem; }
 .sc-tag     { font-size: .78rem; color: var(--tx2); line-height: 1.5; margin-bottom: 1.25rem; }
 .sc-score-row { display: flex; align-items: flex-end; justify-content: space-between; margin-bottom: 1rem; }
-.sc-score     { font-family: var(--serif); font-size: 2rem; line-height: 1; }
+.sc-score     { font-family: var(--serif); font-size: 2rem; line-height: 1.2; }
 .sc-score-lbl { font-family: var(--mono); font-size: .55rem; color: var(--tx3); text-transform: uppercase; letter-spacing: .08em; }
 .sc-threads   { font-family: var(--mono); font-size: .6rem; color: var(--tx3); text-align: right; }
 .sc-load-btn {

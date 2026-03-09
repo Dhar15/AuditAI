@@ -40,7 +40,7 @@ function RadarChart({ samples, highlighted }) {
   }
 
   return (
-    <svg viewBox="0 0 400 400" className="radar-svg">
+    <svg viewBox="-20 -20 440 440" className="radar-svg">
       {/* Grid rings */}
       {rings.map(pct => (
         <polygon
