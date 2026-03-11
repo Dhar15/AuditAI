@@ -28,7 +28,7 @@ With CSRD live from the 2024 reporting cycle and SEC climate disclosure rules in
 
 ## Features
 
-### 📊 Credibility Score
+### 1. Credibility Score
 A 0–100 score calculated from four rule-based dimensions - not AI estimation, but an explicit rubric applied to extracted commitment data.
 
 | Dimension | Weight | How It's Calculated |
@@ -38,19 +38,19 @@ A 0–100 score calculated from four rule-based dimensions - not AI estimation, 
 | **Ambition** | 25% | Base 50. Adjustments for absolute vs intensity targets, capex allocation, net zero presence, target year changes. |
 | **Disclosure** | 15% | Base 40. Rewards actual progress figures, methodology transparency, interim milestones. Penalises silent removals. |
 
-### ⚠️ Regulatory Exposure Quantifier
-Translates the credibility score into a dollar exposure window - broken down by CSRD fines, SEC enforcement, climate litigation, and cost of capital impact. Derived from actual revenue, listing jurisdictions, and drift event count.
+### 2. Commitment Registry
+A fully filterable table of every commitment extracted across all loaded reports. Filter by year, category, and significance. Shows the raw commitment text, the specific metric, and the target year side by side — the ground truth layer that everything else is derived from.
 
-### 📈 Peer Benchmarking Radar
+### 3. Peer Benchmarking Radar
 Interactive 3D radar chart comparing BP, Shell, and TotalEnergies across all four dimensions. Drag to rotate. Hover the legend or score table to isolate a company.
 
-### 🔍 Drift Analysis
+### 4. Drift Analysis
 Commitment threads tracked year-over-year. Each thread shows exactly how language changed between filings - with drift labels (Maintained / Softened / Revised Down / Dropped / Walked Back) and an explanation of why it matters for regulatory exposure.
 
-### 🤖 Live Commitment Extractor
+### 5. Live Commitment Extractor
 Paste any paragraph from any annual report. AuditAI extracts every commitment in under 5 seconds - structured with topic, category, metric, target year, conditionality, and significance. Download as Excel.
 
-### 💬 Q&A Co-pilot
+### 6. Q&A Co-pilot
 Ask any question about a loaded company's commitments. Grounded in the extracted commitment corpus - not general knowledge.
 
 ---
